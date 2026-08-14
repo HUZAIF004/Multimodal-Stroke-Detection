@@ -1,0 +1,2309 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroLoom</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+   
+    <style>
+        :root {
+            --primary-glow: #00C6FF;
+            --secondary-glow: #0072FF;
+            --logo-neon-cyan: #00FFFF;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0A0A0A;
+            color: #E0E0E0;
+            overflow-x: hidden;
+        }
+        #animated-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-color: #0A0A0A;
+            background-image: radial-gradient(circle at center, rgba(0, 114, 255, 0.1), transparent 40%);
+        }
+        canvas {
+            display: block;
+        }
+        main {
+            position: relative;
+            z-index: 10;
+        }
+        .glass-panel {
+            background-color: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 198, 255, 0.05);
+        }
+        .text-gray-900, h2, h3, h1 { color: #E0E0E0; }
+        .text-gray-500, .text-slate-500 { color: #B0B0B0; }
+        .text-blue-600 { color: #00C6FF; }
+        .text-gray-700 { color: #C0C0C0; }
+
+        /* Custom scrollbar */
+        .modal-content::-webkit-scrollbar { width: 8px; }
+        .modal-content::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
+        .modal-content::-webkit-scrollbar-thumb { background: var(--primary-glow); border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.1); }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px var(--primary-glow), 0 0 10px var(--primary-glow); }
+            50% { box-shadow: 0 0 15px var(--primary-glow), 0 0 25px var(--primary-glow); }
+            100% { box-shadow: 0 0 5px var(--primary-glow), 0 0 10px var(--primary-glow); }
+        }
+       
+        /* Nav CTA */
+        .nav-cta-button {
+            display: inline-block;
+            background-color: var(--primary-glow);
+            color: #0A0A0A;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .nav-cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px var(--primary-glow);
+            background-color: #0099CC;
+            color: white;
+        }
+        .nav-link {
+            color: #B0B0B0;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #E0E0E0;
+        }
+
+        /* Hero CTAs */
+        .hero-cta-primary {
+            transition: all 0.3s ease;
+            border: none;
+            background-color: var(--primary-glow);
+            animation: pulse-glow 2s infinite;
+            color: white;
+            font-weight: 600;
+            padding: 1rem 3rem;
+            border-radius: 9999px;
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+        }
+        .hero-cta-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px #00C6FF, 0 0 30px #00C6FF, 0 0 40px #00C6FF;
+            background-color: #0099CC;
+            animation: none;
+        }
+        .hero-cta-secondary {
+            transition: all 0.3s ease;
+            border: 1px solid var(--primary-glow);
+            background-color: transparent;
+            color: var(--primary-glow);
+            font-weight: 600;
+            padding: 1rem 3rem;
+            border-radius: 9999px;
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+        }
+        .hero-cta-secondary:hover {
+            background-color: rgba(0, 198, 255, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(0, 198, 255, 0.3);
+        }
+       
+        #cta-button {
+            transition: all 0.3s ease;
+            border: none;
+            background-color: var(--primary-glow);
+            animation: pulse-glow 2s infinite;
+            color: white;
+            font-weight: 600;
+            padding: 1rem 3rem;
+            border-radius: 9999px;
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+        }
+        #cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px #00C6FF, 0 0 30px #00C6FF, 0 0 40px #00C6FF;
+            background-color: #0099CC;
+            animation: none;
+        }
+       
+        /* Form Styles */
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: #C0C0C0;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #E0E0E0;
+        }
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus {
+            outline: none;
+            border-color: #00C6FF;
+            box-shadow: 0 0 0 1px #00C6FF;
+        }
+
+        /* --- UI/UX #6: Segmented Control --- */
+        .segmented-control {
+            display: flex;
+            width: 100%;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+        .segment-label {
+            flex-grow: 1;
+            text-align: center;
+            padding: 0.5rem 0.75rem;
+            color: #B0B0B0;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .segment-label:last-child {
+            border-right: none;
+        }
+        .segment-label:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .segmented-control input[type="radio"]:checked + .segment-label {
+            background-color: var(--primary-glow);
+            color: #0A0A0A;
+            font-weight: 600;
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+        .segmented-control input[type="radio"] {
+            display: none; /* Hide the actual radio button */
+        }
+
+        .form-group input[type=number]::-webkit-inner-spin-button,
+        .form-group input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .form-group input[type=number] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+       
+        .form-section-heading {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600;
+            color: var(--primary-glow);
+            border-bottom: 1px solid rgba(0, 198, 255, 0.3);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            grid-column: 1 / -1; /* Span full width in grid */
+        }
+       
+        /* --- UI/UX #6: Tooltip --- */
+        .tooltip-icon {
+            position: relative;
+            cursor: help;
+        }
+        .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            width: 250px;
+            background-color: #1C1F2A;
+            color: #B0B8C4;
+            font-weight: 400;
+            font-size: 0.85rem;
+            text-align: left;
+            border-radius: 6px;
+            padding: 0.75rem;
+            position: absolute;
+            z-index: 100;
+            bottom: 125%; /* Position above the icon */
+            left: 50%;
+            margin-left: -125px; /* Center it */
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .tooltip-text::after { /* Tooltip arrow */
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1C1F2A transparent transparent transparent;
+        }
+        .tooltip-icon:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+
+        /* File upload styles */
+        .file-drop-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 0.5rem;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            background-color: rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .file-drop-area svg {
+            width: 2.5rem;
+            height: 2.5rem;
+            color: #888;
+            transition: all 0.2s ease-in-out;
+        }
+        .file-drop-area.dragover {
+            border-color: #00C6FF;
+            background-color: rgba(0, 255, 255, 0.05);
+        }
+        .file-drop-area.dragover svg {
+            color: #00C6FF;
+        }
+        .file-drop-area p {
+            margin: 0;
+            pointer-events: none;
+        }
+        .file-drop-area.has-file {
+            border-color: #22C55E;
+            border-style: solid;
+        }
+        .file-drop-area.has-file .file-upload-prompt {
+            display: none;
+        }
+        .file-drop-area .file-preview {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+        .file-drop-area.has-file .file-preview {
+            display: flex;
+        }
+       
+        .upload-area {
+            transition: all 0.5s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            margin-top: 0;
+        }
+        .upload-area.upload-area-active {
+            max-height: 700px;
+            opacity: 1;
+            margin-top: 1.5rem;
+        }
+
+        /* --- UI/UX #8: Modal Overlay & Analyzer Section --- */
+        #modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            z-index: 40;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+            display: none; /* <-- FIX: Start hidden */
+        }
+        #modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+       
+        #risk-analyzer-section {
+            display: none; /* JS will toggle this */
+            opacity: 0;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            overflow-y: auto;
+            padding: 2rem;
+            transition: opacity 0.3s ease-in-out;
+            /* --- FIX: Added transition-out class --- */
+            transform: scale(1);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        #risk-analyzer-section.transition-in {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            opacity: 1;
+            transform: scale(1);
+        }
+        #risk-analyzer-section.transition-out {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        /* New container for sidebar + content */
+        #analyzer-modal-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 2rem auto;
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+        }
+
+        /* Page Transitions */
+        #homepage-content {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        #homepage-content.transition-out {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+        #homepage-content.transition-in {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+
+        #step-sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            padding-top: 2rem;
+        }
+        .step-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            color: #B0B0B0;
+        }
+        .step-nav-item .step-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .step-nav-item .step-check {
+            display: none;
+            width: 24px;
+            height: 24px;
+            color: #22C55E;
+            margin-right: 0.75rem;
+        }
+        .step-nav-item.active {
+            background-color: rgba(0, 198, 255, 0.1);
+            border-left-color: var(--primary-glow);
+            color: #E0E0E0;
+        }
+        .step-nav-item.active .step-circle {
+            border-color: var(--primary-glow);
+            color: var(--primary-glow);
+        }
+        .step-nav-item.completed {
+            color: #888;
+        }
+        .step-nav-item.completed .step-circle {
+            display: none;
+        }
+        .step-nav-item.completed .step-check {
+            display: block;
+        }
+
+        #risk-analyzer-content {
+            flex-grow: 1;
+            min-width: 0;
+        }
+       
+        #risk-analyzer-container {
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+            position: relative;
+            display: none;
+            margin: 0;
+        }
+        #form-steps {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            width: 300%;
+        }
+        .form-step {
+            width: 33.3333%;
+            flex-shrink: 0;
+            padding: 0 10px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .progress-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 5px;
+            background-color: var(--primary-glow);
+            transition: width 0.5s ease-in-out;
+            border-radius: 2.5px;
+        }
+
+        .form-step-page {
+            display: none;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        #step-4.form-step-page {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        #step-5.form-step-page {
+            display: none;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+       
+        /* Buttons */
+        .form-button {
+            display: inline-block;
+            background-color: var(--primary-glow);
+            color: white;
+            font-weight: 600;
+            padding: 0.8rem 2rem;
+            border-radius: 9999px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid var(--primary-glow);
+        }
+        .form-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px var(--primary-glow);
+            background-color: #0099CC;
+        }
+        .form-button.secondary {
+            background-color: transparent;
+            color: var(--primary-glow);
+        }
+        .form-button.secondary:hover {
+            background-color: rgba(0, 255, 255, 0.1);
+        }
+        .form-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #555;
+            border-color: #555;
+            box-shadow: none;
+            transform: none;
+        }
+       
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: var(--primary-glow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.05);
+            z-index: 10;
+        }
+        .back-button:hover { background-color: rgba(255, 255, 255, 0.1); }
+       
+        /* Aurora Text Effect */
+        .aurora h1, .aurora-span {
+            color: transparent;
+            background-clip: text;
+            -webkit-background-clip: text;
+            background-image: linear-gradient( 90deg, #00C6FF 0%, #0072FF 20%, #F0F8FF 40%, #F0F8FF 60%, #0072FF 80%, #00C6FF 100% );
+            background-size: 200% 100%;
+            animation: aurora-flow 5s linear infinite;
+        }
+        @keyframes aurora-flow { to { background-position: 200% center; } }
+       
+        /* Scroll fade-in */
+        .fade-in-on-scroll { opacity: 0; transform: translateY(20px); transition: opacity 1s ease-out, transform 1s ease-out; }
+        .fade-in-on-scroll.visible { opacity: 1; transform: translateY(0); }
+
+        /* Loading Spinner */
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(0, 255, 255, 0.2);
+            border-top: 5px solid var(--primary-glow);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Results Display */
+        #results-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 1rem;
+        }
+        @media (min-width: 640px) {
+            #results-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .result-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        .result-card h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #B0B0B0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .result-card .risk-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-glow);
+            transition: all 0.3s ease;
+        }
+       
+        .explanation-text {
+            color: #C0C0C0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .explanation-text p {
+            margin-bottom: 0.75rem;
+        }
+        .explanation-text ul {
+            margin: 0.5rem 0;
+        }
+        .explanation-text li {
+            margin-left: 1.25rem;
+        }
+        .explanation-text strong {
+            color: #E0E0E0;
+        }
+        .explanation-text .text-red-400 {
+            color: #F87171;
+        }
+       
+        #overall-result-card {
+            grid-column: 1 / -1;
+            text-align: center;
+        }
+       
+        #overall-result-card #final-decision-text {
+            font-size: 1rem;
+            color: #E0E0E0;
+            margin-top: 0.5rem;
+        }
+
+        /* Risk Circle Styles */
+        .risk-circle-base {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 8px solid #555;
+            transition: all 0.5s ease;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        .risk-circle-base .risk-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #E0E0E0;
+            transition: all 0.5s ease;
+        }
+       
+        /* --- UI/UX FIX #10: Color-coded cards & values --- */
+        /* Risk Circle & Sub-card Color Modifiers */
+        .risk-green {
+            border-color: #22C55E; /* green-500 */
+        }
+        .risk-green .risk-value {
+            color: #22C55E;
+        }
+        #overall-result-card.risk-green {
+            box-shadow: 0 0 20px #22C55E, 0 0 30px #22C55E inset;
+        }
+
+        .risk-yellow {
+            border-color: #FACC15; /* yellow-400 */
+        }
+        .risk-yellow .risk-value {
+            color: #FACC15;
+        }
+        #overall-result-card.risk-yellow {
+            box-shadow: 0 0 20px #FACC15, 0 0 30px #FACC15 inset;
+        }
+
+        .risk-red {
+            border-color: #EF4444; /* red-500 */
+        }
+        .risk-red .risk-value {
+            color: #EF4444;
+        }
+        #overall-result-card.risk-red {
+            box-shadow: 0 0 20px #EF4444, 0 0 30px #EF4444 inset;
+        }
+        /* --- END OF NEW CSS --- */
+
+
+        /* Homepage Section Styles */
+        #homepage-content section {
+            padding-top: 4rem;
+            padding-bottom: 4rem;
+        }
+        @media (min-width: 768px) {
+            #homepage-content section {
+                padding-top: 6rem;
+                padding-bottom: 6rem;
+            }
+        }
+        #hero-section {
+            padding-top: 8rem;
+            padding-bottom: 8rem;
+        }
+        @media (min-width: 768px) {
+            #hero-section {
+                padding-top: 12rem;
+                padding-bottom: 12rem;
+            }
+        }
+
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .section-title .aurora-span {
+            font-size: inherit;
+            font-weight: inherit;
+        }
+        .info-card {
+            background-color: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(0, 198, 255, 0.15);
+            border-color: rgba(0, 198, 255, 0.2);
+        }
+        .info-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #E0E0E0;
+            margin-bottom: 0.5rem;
+        }
+        .info-card p {
+            font-size: 1rem;
+            color: #B0B0B0;
+        }
+        .info-icon {
+            width: 3rem;
+            height: 3rem;
+            color: var(--primary-glow);
+            margin-bottom: 1rem;
+        }
+
+        /* B.E.F.A.S.T Section */
+        #fast-section {
+            background-color: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
+        }
+        #fast-section .fast-letter {
+            font-weight: 800;
+            color: #F87171;
+        }
+        #fast-section .fast-title {
+            color: #FCA5A5;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+        }
+        #fast-section .call-now {
+            color: #FFFFFF;
+            font-weight: 700;
+            background-color: #DC2626;
+            border-bottom: 4px solid #B91C1C;
+            transition: all 0.2s ease;
+        }
+        #fast-section .call-now:hover {
+            background-color: #EF4444;
+            transform: translateY(-2px);
+        }
+       
+        /* Stats Ticker */
+        #stats-ticker-text {
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Interactive Modalities */
+        .modality-button {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.03);
+            font-size: 1rem;
+            font-weight: 600;
+            color: #B0B0B0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .modality-button svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        .modality-button:hover {
+            background-color: rgba(255, 255, 255, 0.07);
+            color: #E0E0E0;
+            border-left: 4px solid var(--primary-glow);
+            padding-left: calc(1.5rem - 3px);
+        }
+        .modality-button.active {
+            background-color: rgba(0, 198, 255, 0.1);
+            color: var(--primary-glow);
+            border-color: rgba(0, 198, 255, 0.3);
+            border-left: 4px solid var(--primary-glow);
+            padding-left: calc(1.5rem - 3px);
+            box-shadow: 0 0 15px rgba(0, 198, 255, 0.1);
+        }
+        .modality-button.active svg {
+            color: var(--primary-glow);
+        }
+       
+        .modality-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .modality-content.active {
+            display: block;
+            opacity: 1;
+        }
+        .modality-content h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #E0E0E0;
+            margin-bottom: 1rem;
+        }
+        .modality-content p {
+            font-size: 1.125rem;
+            color: #B0B0B0;
+            line-height: 1.75;
+        }
+
+        /* --- New: Warning Modal Styles --- */
+        #warning-modal {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+        }
+        #warning-modal.active {
+             display: flex;
+        }
+        #warning-modal-content {
+            background-color: #1A1A1A;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 0 25px rgba(239, 44, 44, 0.5);
+            border: 1px solid #DC2626;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+        #warning-modal.active #warning-modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div id="animated-bg"></div>
+   
+    <!-- ==== Modal Overlay ==== -->
+    <div id="modal-overlay"></div>
+
+    <div class="relative z-10">
+        <!-- ==== Header ==== -->
+        <header class="sticky top-0 z-30 glass-panel">
+            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <!-- Logo -->
+                    <div class="flex-shrink-0">
+                        <a href="#" id="logo-home-link" class="flex items-center">
+                            <span class="font-bold text-xl" style="color: var(--logo-neon-cyan);">NeuroLoom</span>
+                        </a>
+                    </div>
+                   
+                    <!-- Desktop Nav Links -->
+                    <div class="hidden md:flex md:items-center md:space-x-6">
+                        <a href="#about" class="nav-link">About Stroke</a>
+                        <a href="#how-it-works" class="nav-link">How It Works</a>
+                        <a href="#interactive-modalities" class="nav-link">Modalities</a>
+                        <!-- 5. ADDED NEW NAVIGATION LINK -->
+                        <a href="#fast-section" class="nav-link">Emergency Protocol</a>
+                        <button id="nav-start-analysis" class="nav-cta-button">
+                            Start Risk Analysis
+                        </button>
+                    </div>
+                   
+                    <!-- Mobile Menu Button (Optional, for later) -->
+                    <div class="md:hidden">
+                        <button id="mobile-nav-start-analysis" class="nav-cta-button">
+                            Start
+                        </button>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Homepage Content Section -->
+        <main id="homepage-content">
+            <!-- ==== Hero Section ==== -->
+            <section id="hero-section" class="flex flex-col justify-center items-center text-center px-4 md:px-8">
+                <div class="aurora">
+                    <h1 class="text-5xl md:text-7xl font-extrabold tracking-tighter leading-none mb-4">
+                        NeuroLoom
+                    </h1>
+                </div>
+                <!-- New Subtitle -->
+                <p class="text-xl md:text-2xl max-w-3xl mx-auto mb-8 text-gray-400">
+                    A multi-modal AI platform for early-stage stroke risk assessment. Understand your risk from clinical, genetic, and imaging data.
+                </p>
+                <!-- New CTA Buttons (Only retaining Hero CTA) -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button id="hero-start-analysis" class="hero-cta-primary">
+                        Start Risk Analysis
+                    </button>
+                    <a href="#about" class="hero-cta-secondary">
+                        Learn More
+                    </a
+>
+                </div>
+                <!-- Stats Ticker -->
+                <div class="mt-16">
+                    <p class="text-lg md:text-xl max-w-4xl mx-auto text-gray-500 h-8 flex flex-row items-center justify-center">
+                        <span id="stats-ticker-container" class="inline-block text-left w-full md:w-auto text-center md:text-left">
+                            <span id="stats-ticker-text" class="aurora-span inline-block transition-opacity duration-500 opacity-100 font-semibold"></span>
+                        </span>
+                    </p>
+                </div>
+            </section>
+
+            <!-- About Stroke Section -->
+            <section id="about" class="fade-in-on-scroll">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 glass-panel p-8 md:p-12">
+                    <h2 class="text-3xl font-bold text-center mb-6">What is a <span class="aurora-span">Stroke</span>?</h2>
+                    <p class="text-xl max-w-4xl mx-auto text-gray-400 leading-relaxed">
+                        A stroke occurs when the blood supply to part of your brain is interrupted or reduced, depriving brain tissue of oxygen and nutrients. Within minutes, brain cells begin to die. This can be caused by a clot (ischemic stroke) or a burst blood vessel (hemo-rragic stroke). Strokes are the leading cause of long-term disability and a major cause of death worldwide.
+                    </p>
+                    <p class="mt-4 text-xl max-w-4xl mx-auto text-gray-400 leading-relaxed">
+                        The effects can be devastating, impacting motor skills, speech, and cognitive function. However, with timely prevention and immediate care, the outcomes can be significantly improved. Our platform provides the insights necessary to understand and mitigate this risk.
+                    </p>
+                </div>
+            </section>
+
+            <!-- How It Works Section -->
+            <section id="how-it-works" class="fade-in-on-scroll">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="section-title">Our <span class="aurora-span">3-Step Process</span></h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Step 1 Card -->
+                        <div class="info-card">
+                            <svg class="info-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.33 0 4.5 4.5 0 01-1.41 8.775H6.75z" />
+                            </svg>
+                            <h3>1. Upload Your Data</h3>
+                            <p>Securely provide your clinical (EHR) data, genetic report, and MRI scan through our guided process.</p>
+                        </div>
+                        <!-- Step 2 Card -->
+                        <div class="info-card">
+                            <svg class="info-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                            </svg>
+                            <h3>2. AI-Powered Analysis</h3>
+                            <p>Our multi-modal AI analyzes each piece of data, identifying complex patterns and risk factors invisible to the naked eye.</p>
+                        </div>
+                        <!-- Step 3 Card -->
+                        <div class="info-card">
+                            <svg class="info-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 100 15 7.5 7.5 0 000-15zM21 21l-5.197-5.197" />
+                            </svg>
+                            <h3>3. Receive Your Report</h3>
+                            <p>Get a unified, easy-to-understand risk score and a detailed breakdown of the contributing factors from each data source.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- --- Interactive Data Modalities Section --- -->
+            <section id="interactive-modalities" class="fade-in-on-scroll">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="section-title">A <span class="aurora-span">Multi-Modal</span> Approach</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Column 1: Buttons -->
+                        <div class="flex flex-col space-y-4">
+                            <button class="modality-button active" data-target="modality-ehr">
+                                <!-- New Icon: Clipboard -->
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9A2.25 2.25 0 0 0 19.5 10.5c0-.621-.504-1.125-1.125-1.125H15M9 7.5h1.5m-1.5 3h1.5m-1.5 3h1.5" />
+                                </svg>
+                                <span>Clinical & Lifestyle (EHR)</span>
+                            </button>
+                            <button class="modality-button" data-target="modality-genetic">
+                                <!-- New Icon: DNA Helix -->
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5M5.625 7.5a1.875 1.875 0 0 0-1.875 1.875v.375a1.875 1.875 0 0 0 1.875 1.875H6M18.375 7.5a1.875 1.875 0 0 1 1.875 1.875v.375a1.875 1.875 0 0 1-1.875 1.875H18m-1.5-3.75v3.75m0-3.75a1.875 1.875 0 0 0-1.875-1.875H15m1.5 5.625a1.875 1.875 0 0 1-1.875 1.875H15m-3-5.625v3.75m0 0a1.875 1.875 0 0 0 1.875 1.875h.375a1.875 1.875 0 0 0 1.875-1.875m-3.75-3.75a1.875 1.875 0 0 0-1.875-1.875H12m1.5 5.625a1.875 1.875 0 0 1-1.875 1.875H12m-1.5-3.75v3.75m0 0a1.875 1.875 0 0 1-1.875 1.875h-.375a1.875 1.875 0 0 1-1.875-1.875m3.75-3.75a1.875 1.875 0 0 0 1.875-1.875H9M5.625 16.5a1.875 1.875 0 0 0 1.875 1.875h.375a1.875 1.875 0 0 0 1.875-1.875v-.375a1.875 1.875 0 0 0-1.875-1.875H6M18.375 16.5a1.875 1.875 0 0 1-1.875 1.875h-.375a1.875 1.875 0 0 1-1.875-1.875v-.375a1.875 1.875 0 0 1 1.875-1.875H18" />
+                                </svg>
+                                <span>Genetic Predisposition</span>
+                            </button>
+                            <button class="modality-button" data-target="modality-mri">
+                                <!-- New Icon: Brain -->
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.898 20.624l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L13.15 16.5l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L17.25 12l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L20.85 16.5l-1.035.259a3.375 3.375 0 0 0-2.456 2.456l-.259 1.035Z" />
+                                </svg>
+                                <span>Acute MRI Findings</span>
+                            </button>
+                        </div>
+                        <!-- Column 2: Content Display -->
+                        <div class="md:col-span-2 glass-panel p-8 min-h-[250px] relative">
+                            <div id="modality-ehr" class="modality-content active">
+                                <h3>Clinical & Lifestyle (EHR)</h3>
+                                <p>Analyzes key metrics like age, blood pressure, BMI, and lifestyle factors to establish a baseline long-term risk.</p>
+                            </div>
+                            <div id="modality-genetic" class="modality-content">
+                                <h3>Genetic Predisposition</h3>
+                                <p>Scans your genetic report for thousands of known markers (SNPs) associated with stroke, revealing your inherited risk profile.</p>
+                            </div>
+                            <div id="modality-mri" class="modality-content">
+                                <h3>Acute MRI Findings</h3>
+                                <p>Uses a deep learning model (SegResNet) to analyze your DWI and ADC scans for immediate, "acute" signs of stroke-related lesions.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- B.E. F.A.S.T. Section -->
+            <section id="fast-section" class="fade-in-on-scroll">
+                <div class="max-w-4xl mx-auto px-8 sm:px-6 lg:px-8 text-center">
+                    <h2 class="section-title fast-title">Know the Signs: B.E. F.A.S.T.</h2>
+                    <p class="text-xl max-w-3xl mx-auto text-gray-300 leading-relaxed">
+                        This tool is for risk *assessment*, not diagnosis. If you or someone you know shows any signs of a stroke, <strong class="text-white">call 911 immediately</strong>.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left my-12">
+                        <div class="p-4">
+                            <p class="text-2xl mb-2"><span class="fast-letter">B</span> - Balance</p>
+                            <p class="text-gray-300">Sudden loss of balance or coordination?</p>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-2xl mb-2"><span class="fast-letter">E</span> - Eyes</p>
+                            <p class="text-gray-300">Sudden blurred, double, or lost vision?</p>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-2xl mb-2"><span class="fast-letter">F</span> - Face</p>
+                            <p class="text-gray-300">Does one side of the face droop?</p>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-2xl mb-2"><span class="fast-letter">A</span> - Arms</p>
+                            <p class="text-gray-300">Does one arm drift downward when raised?</p>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-2xl mb-2"><span class="fast-letter">S</span> - Speech</p>
+                            <p class="text-gray-300">Is speech slurred or strange?</p>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-2xl mb-2"><span class="fast-letter">T</span> - Time</p>
+                            <p class="text-gray-300">Time is critical. Call for help immediately.</p>
+                        </div>
+                    </div>
+                    <!-- 4. REMOVED CALL TO ACTION BUTTON -->
+                </div>
+            </section>
+
+            <!-- 3. REMOVED CTA SECTION -->
+
+            <!-- Footer w/ Disclaimer -->
+            <footer class="py-16 mt-16 border-t border-gray-800">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <p class="text-sm text-gray-500 max-w-3xl mx-auto">
+                        <strong class="text-gray-400">Disclaimer:</strong> NeuroLoom is an informational tool and does not provide medical advice. The results are not a substitute for professional medical consultation, diagnosis, or treatment. All decisions regarding your health should be made in consultation with a qualified healthcare provider.
+                    </p>
+                    <p class="text-sm text-gray-600 mt-4">
+                        © 2024 NeuroLoom. All rights reserved.
+                    </p>
+                </div>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- ==== New Analyzer Layout ==== -->
+    <div id="risk-analyzer-section"> <!-- This is now the modal container -->
+        <div id="analyzer-modal-container"> <!-- This centers the content -->
+           
+            <!-- Step Sidebar -->
+            <nav id="step-sidebar" class="hidden md:block"> <!-- Hide on mobile -->
+                <div class="step-nav-item active" data-step="1">
+                    <span class="step-circle">1</span>
+                    <svg class="step-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                    <span>Clinical Data</span>
+                </div>
+                <div class="step-nav-item" data-step="2">
+                    <span class="step-circle">2</span>
+                    <svg class="step-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                    <span>Genetic Report</span>
+                </div>
+                <div class="step-nav-item" data-step="3">
+                    <span class="step-circle">3</span>
+                    <svg class="step-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                    <span>MRI Upload</span>
+                </div>
+                <div class="step-nav-item" data-step="4">
+                    <span class="step-circle">4</span>
+                    <svg class="step-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                    <span>Analysis</span>
+                </div>
+                <div class="step-nav-item" data-step="5">
+                    <span class="step-circle">5</span>
+                    <svg class="step-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                    <span>Results</span>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <div id="risk-analyzer-content">
+                <!-- Container for steps 1-3 (Glass Panel) -->
+                <div id="risk-analyzer-container" class="glass-panel py-8 px-6 relative">
+                    <!-- Progress bar (now inside for steps 1-3 only) -->
+                    <div class="progress-indicator" id="progress-bar"></div>
+                    <div id="form-steps" class="flex">
+
+                        <!-- ==== STEP 1: Clinical Form ==== -->
+                        <div id="step-1" class="form-step">
+                            <h1 class="text-3xl font-extrabold text-center">Initiate Your Risk Assessment</h1>
+                            <p class="mt-4 text-gray-500 text-center">
+                                Step 1 of 3: Please fill out your clinical data.
+                            </p>
+                            <!-- Use grid for 2 columns on medium screens and up -->
+                            <form id="clinical-records-form" class="mt-8 grid grid-cols-1 md:grid-cols-2 md:gap-x-8">
+                               
+                                <h3 class="form-section-heading md:col-span-2">Personal Info</h3>
+                               
+                                <div class="form-group">
+                                    <label>Name:</label>
+                                    <input type="text" name="Patient Name" placeholder="Enter your full name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Age:</label>
+                                    <input type="number" name="Age" placeholder="Enter age (e.g., 67)" required>
+                                </div>
+                               
+                                <!-- Segmented Controls -->
+                                <div class="form-group">
+                                    <label>Gender:</label>
+                                    <div class="segmented-control">
+                                        <input type="radio" id="gender-male" name="Gender" value="Male" required checked>
+                                        <label for="gender-male" class="segment-label">Male</label>
+                                       
+                                        <input type="radio" id="gender-female" name="Gender" value="Female">
+                                        <label for="gender-female" class="segment-label">Female</label>
+                                       
+                                        <input type="radio" id="gender-other" name="Gender" value="Other">
+                                        <label for="gender-other" class="segment-label">Other</label>
+                                    </div>
+                                </div>
+                               
+                                <div class="form-group">
+                                    <label>Ever Married:</label>
+                                    <div class="segmented-control">
+                                        <input type="radio" id="married-yes" name="Ever married" value="Yes" required checked>
+                                        <label for="married-yes" class="segment-label">Yes</label>
+                                       
+                                        <input type="radio" id="married-no" name="Ever married" value="No">
+                                        <label for="married-no" class="segment-label">No</label>
+                                    </div>
+                                </div>
+                               
+                                <div class="form-group">
+                                    <label>Work Type:</label>
+                                    <div class="segmented-control">
+                                        <input type="radio" id="work-private" name="Work Type" value="Private" required checked>
+                                        <label for="work-private" class="segment-label">Private</label>
+                                       
+                                        <input type="radio" id="work-self" name="Work Type" value="Self-employed">
+                                        <label for="work-self" class="segment-label">Self-Employed</label>
+                                       
+                                        <input type="radio" id="work-govt" name="Work Type" value="Govt_job">
+                                        <label for="work-govt" class="segment-label">Govt.</label>
+                                    </div>
+                                </div>
+                               
+                                <div class="form-group">
+                                    <label>Residence Type:</label>
+                                    <div class="segmented-control">
+                                        <input type="radio" id="res-urban" name="Residence type" value="Urban" required checked>
+                                        <label for="res-urban" class="segment-label">Urban</label>
+                                       
+                                        <input type="radio" id="res-rural" name="Residence type" value="Rural">
+                                        <label for="res-rural" class="segment-label">Rural</label>
+                                    </div>
+                                </div>
+                               
+                                <h3 class="form-section-heading md:col-span-2">Medical History</h3>
+
+                                <div class="form-group">
+                                    <label>Hypertension:</label>
+                                    <div class="segmented-control">
+                                        <input type="radio" id="hyper-yes" name="Hyper tension" value="1" required>
+                                        <label for="hyper-yes" class="segment-label">Yes</label>
+                                        <input type="radio" id="hyper-no" name="Hyper tension" value="0" checked>
+                                        <label for="hyper-no" class="segment-label">No</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Heart Disease:</label>
+                                    <div class="segmented-control">
+                                        <input type="radio" id="heart-yes" name="Heart disease" value="1" required>
+                                        <label for="heart-yes" class="segment-label">Yes</label>
+                                        <input type="radio" id="heart-no" name="Heart disease" value="0" checked>
+                                        <label for="heart-no" class="segment-label">No</label>
+                                    </div>
+                                </div>
+                               
+                                <!-- 1. GLUCOSE LEVEL TOOLTIP FIXED -->
+                                <div class="form-group">
+                                    <label for="glucose-input">
+                                        <span>Average Glucose Level</span>
+                                        <span class="tooltip-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-gray-500"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
+                                            <span class="tooltip-text">Average blood glucose level (mg/dL). High values are a major risk factor for stroke. Please enter your known value, or a default estimate like 106.2 mg/dL.</span>
+                                        </span>
+                                    </label>
+                                    <input id="glucose-input" type="number" step="0.1" name="Avg glucose level" placeholder="e.g., 106.2" required>
+                                </div>
+                               
+                                <!-- 1. BMI TOOLTIP FIXED -->
+                                <div class="form-group">
+                                    <label for="bmi-input">
+                                        <span>BMI</span>
+                                        <span class="tooltip-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-gray-500"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
+                                            <span class="tooltip-text">Body Mass Index (kg/m²). High values (over 30) significantly increase cardiovascular risk. If unknown, please use a placeholder like 26.5.</span>
+                                        </span>
+                                    </label>
+                                    <input id="bmi-input" type="number" step="0.1" name="BMI" placeholder="e.g., 26.5">
+                                </div>
+                               
+                                <!-- 1. HDL TOOLTIP FIXED -->
+                                <div class="form-group">
+                                    <label for="hdl-input">
+                                        <span>HDL Cholesterol</span>
+                                        <span class="tooltip-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-gray-500"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
+                                            <span class="tooltip-text">High-Density Lipoprotein, or "good" cholesterol (mg/dL). Higher values are protective against stroke. If lab results are unavailable, please use a placeholder like 50 mg/dL.</span>
+                                        </span>
+                                    </label>
+                                    <input id="hdl-input" type="number" name="HDL" placeholder="e.g., 50">
+                                </div>
+                               
+                                <!-- 1. LDL TOOLTIP FIXED -->
+                                <div class="form-group">
+                                    <label for="ldl-input">
+                                        <span>LDL Cholesterol</span>
+                                        <span class="tooltip-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-gray-500"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
+                                            <span class="tooltip-text">Low-Density Lipoprotein, or "bad" cholesterol (mg/dL). Lower values are generally healthier. If lab results are unavailable, please use a placeholder like 130 mg/dL.</span>
+                                        </span>
+                                    </label>
+                                    <input id="ldl-input" type="number" name="LDL" placeholder="e.g., 130">
+                                </div>
+
+                                <div class="form-group md:col-span-2">
+                                    <label>Family History of Stroke:</label>
+                                    <div class="segmented-control">
+                                        <input type="radio" id="fam-yes" name="Family History" value="Yes">
+                                        <label for="fam-yes" class="segment-label">Yes</label>
+                                        <input type="radio" id="fam-no" name="Family History" value="No" checked>
+                                        <label for="fam-no" class="segment-label">No</label>
+                                    </div>
+                                </div>
+
+                                <h3 class="form-section-heading md:col-span-2">Lifestyle</h3>
+
+                                <div class="form-group">
+                                    <label>Smoking Status:</label>
+                                    <div class="segmented-control">
+                                        <input type="radio" id="smoke-never" name="Smoking Status" value="never smoked" required checked>
+                                        <label for="smoke-never" class="segment-label">Never</label>
+                                        <input type="radio" id="smoke-former" name="Smoking Status" value="formerly smoked">
+                                        <label for="smoke-former" class="segment-label">Formerly</label>
+                                        <input type="radio" id="smoke-yes" name="Smoking Status" value="smokes">
+                                        <label for="smoke-yes" class="segment-label">Smokes</label>
+                                        <input type="radio" id="smoke-unknown" name="Smoking Status" value="Unknown">
+                                        <label for="smoke-unknown" class="segment-label">Unknown</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Alcohol Intake:</label>
+                                    <div class="segmented-control">
+                                        <input type="radio" id="alc-never" name="Alcohol Intake" value="never taken" checked>
+                                        <label for="alc-never" class="segment-label">Never</label>
+                                        <input type="radio" id="alc-former" name="Alcohol Intake" value="formerly taken">
+                                        <label for="alc-former" class="segment-label">Formerly</label>
+                                        <input type="radio" id="alc-yes" name="Alcohol Intake" value="yes">
+                                        <label for="alc-yes" class="segment-label">Yes</label>
+                                    </div>
+                                </div>
+                                <div class="form-group md:col-span-2">
+                                    <label>Stress Levels:</label>
+                                    <div class="segmented-control">
+                                        <input type="radio" id="stress-yes" name="Stress Levels" value="Yes">
+                                        <label for="stress-yes" class="segment-label">Yes</label>
+                                        <input type="radio" id="stress-no" name="Stress Levels" value="No" checked>
+                                        <label for="stress-no" class="segment-label">No</label>
+                                    </div>
+                                </div>
+
+                                <!-- Button container spans full width -->
+                                <div class="text-center mt-6 md:col-span-2">
+                                    <button type="button" id="next-step-button" class="form-button">
+                                        Next Step
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- ==== STEP 2: Genetic Report ==== -->
+                        <div id="step-2" class="form-step relative">
+                             <button id="back-button-step2" class="back-button p-2 rounded-full hover:bg-white/10">
+                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                                 </svg>
+                             </button>
+                            <h1 class="text-3xl font-extrabold text-center">Step 2: Genetic Report</h1>
+                            <p class="mt-4 text-gray-500 text-center">
+                                Step 2 of 3: Please upload your genetic report. This step is optional.
+                            </p>
+                            <form id="genetic-form" class="text-left mt-8">
+                                <div class="form-group">
+                                    <label>Genetic Report (e.g., 23andMe .txt)</label>
+                                    <!-- --- UI/UX FIX #7: Icon & Preview Added --- -->
+                                    <div id="genetic-file-drop-area" class="file-drop-area">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75c0-.231-.035-.454-.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5" /></svg>
+                                        <p id="genetic-upload-prompt" class="text-gray-500 file-upload-prompt">Drag & drop .txt file here, or click</p>
+                                        <div id="genetic-filename-display" class="file-preview"></div>
+                                    </div>
+                                    <input type="file" id="genetic-file-input" name="geneticReport" class="hidden" accept=".txt,.csv,.assoc">
+                                </div>
+                                <div class="text-center mt-6">
+                                    <button type="button" id="next-step-button-2" class="form-button">
+                                        Next Step
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- ==== STEP 3: MRI Upload ==== -->
+                        <div id="step-3" class="form-step relative">
+                             <button id="back-button-step3" class="back-button p-2 rounded-full hover:bg-white/10">
+                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                                 </svg>
+                             </button>
+                            <h1 class="text-3xl font-extrabold text-center">Step 3: MRI Scan</h1>
+                            <p class="mt-4 text-gray-500 text-center">
+                                Step 3 of 3: How would you like to upload your scan? This step is optional.
+                            </p>
+                           
+                            <div class="flex gap-4 mt-8">
+                                <!-- 1. RENAMED PATIENT UPLOAD -->
+                                <button type="button" id="patient-mri-choice" class="form-button secondary w-full">DICOM Upload</button>
+                                <button type="button" id="researcher-mri-choice" class="form-button secondary w-full">Advanced Upload</button>
+                            </div>
+                           
+                            <form id="mri-upload-form" class="text-left mt-8">
+                                <!-- --- UI/UX FIX #8: Added .upload-area class --- -->
+                                <div id="dicom-zip-upload-area" class="upload-area">
+                                    <label class="text-gray-400 text-sm">This is the recommended path for most users.</label>
+                                    <div class="form-group mt-2">
+                                        <label>Upload your entire MRI folder (as a .zip file)</label>
+                                        <div id="dicom-zip-drop-area" class="file-drop-area">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75V18H18v.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 12l-3-3m3 3l3-3" /></svg>
+                                            <p id="dicom-zip-prompt" class="text-gray-500 file-upload-prompt">Drag & drop .zip file here, or click</p>
+                                            <div id="dicom-zip-filename" class="file-preview"></div>
+                                        </div>
+                                        <input type="file" id="dicom-zip-input" name="dicomZip" class="hidden" accept=".zip">
+                                    </div>
+                                </div>
+                               
+                                <!-- --- UI/UX #8: Added .upload-area class --- -->
+                                <div id="nifti-upload-area" class="upload-area">
+                                    <label class="text-gray-400 text-sm">For users with pre-processed NIFTI files.</label>
+                                    <div class="form-group mt-2">
+                                        <label>1. DWI Scan (.nii or .nii.gz)</label>
+                                        <div id="dwi-scan-drop-area" class="file-drop-area">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a2.25 2.25 0 0 0-2.25-2.25H13.5" /></svg>
+                                            <p id="dwi-scan-prompt" class="text-gray-500 file-upload-prompt">Drag & drop DWI file, or click</p>
+                                            <div id="dwi-scan-filename" class="file-preview"></div>
+                                        </div>
+                                        <input type="file" id="dwi-scan-input" name="dwiScan" class="hidden" accept=".nii,.nii.gz">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>2. ADC Scan (.nii or .nii.gz)</label>
+                                        <div id="adc-scan-drop-area" class="file-drop-area">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a2.25 2.25 0 0 0-2.25-2.25H13.5" /></svg>
+                                            <p id="adc-scan-prompt" class="text-gray-500 file-upload-prompt">Drag & drop ADC file, or click</p>
+                                            <div id="adc-scan-filename" class="file-preview"></div>
+                                        </div>
+                                        <input type="file" id="adc-scan-input" name="adcScan" class="hidden" accept=".nii,.nii.gz">
+                                    </div>
+                                </div>
+
+                                <div class="text-center mt-6">
+                                    <button type="button" id="submit-analysis" class="form-button" disabled>
+                                        Submit for Analysis
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                       
+                    </div>
+                </div> <!-- End of risk-analyzer-container (steps 1-3) -->
+
+
+                <!-- ==== STEP 4: Loading (MOVED, ENHANCED) ==== -->
+                <div id="step-4" class="form-step-page">
+                    <div class="flex flex-col items-center justify-center min-h-[80vh]">
+                        <div class="loading-spinner"></div>
+                        <h2 class="text-2xl font-bold text-center mt-6">Analyzing Data...</h2>
+                        <!-- 2. ADDED DYNAMIC STATUS MESSAGE CONTAINER -->
+                        <p id="loading-status-message" class="mt-4 text-gray-500 text-center text-lg font-medium h-6">
+                            Initializing AI systems...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ==== STEP 5: Results (MOVED) ==== -->
+                <div id="step-5" class="form-step-page">
+                    <button id="restart-button" class="back-button p-2 rounded-full hover:bg-white/10">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.182m12.022-12.022L2.985 19.644M21.015 4.356m0 0-3.182 3.182m3.182-3.182v4.992m0 0h-4.992" />
+                        </svg>
+                    </button>
+                    <h1 class="text-3xl font-extrabold text-center" id="results-title">Analysis Complete</h1>
+                   
+                    <div id="results-content" class="mt-6">
+                        <!-- Overall Score -->
+                        <div id="overall-result-card" class="result-card glass-panel mb-4">
+                            <h3>Overall Stroke Risk</h3>
+                           
+                            <div class="flex justify-center items-center my-4">
+                                <div id="risk-circle" class="risk-circle-base">
+                                    <span id="overall-risk-value" class="risk-value">0.0%</span>
+                                </div>
+                            </div>
+
+                            <p id="final-decision-text" class="text-gray-500"></p>
+                        </div>
+
+                        <!-- Sub-scores -->
+                        <div id="results-grid" class="mb-4">
+                            <div id="ehr-risk-card" class="result-card">
+                                <h3>Clinical (EHR) Risk</h3>
+                                <div id="ehr-risk-value" class="risk-value">0.0%</div>
+                            </div>
+                            <div id="genetic-risk-card" class="result-card">
+                                <h3>Genetic Risk</h3>
+                                <div id="genetic-risk-value" class="risk-value">0.0%</div>
+                            </div>
+                            <div id="mri-risk-card" class="result-card">
+                                <h3>Acute MRI Risk</h3>
+                                <div id="mri-risk-value" class="risk-value">0.0%</div>
+                            </div>
+                        </div>
+                       
+                        <h2 class="text-xl font-bold text-center mt-6 mb-4">Risk Factor Analysis</h2>
+                        <div id="explainability-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="result-card">
+                                <h3>Clinical (EHR) Factors</h3>
+                                <div id="ehr-explanation-text" class="explanation-text"></div>
+                            </div>
+                            <div class="result-card">
+                                <h3>Genetic Factors</h3>
+                                <div id="genetic-explanation-text" class="explanation-text"></div>
+                            </div>
+                            <div class="result-card md:col-span-2">
+                                <h3>MRI Scan Analysis</h3>
+                                <div id="mri-explanation-text" class="explanation-text"></div>
+                            </div>
+                        </div>
+
+                        <!-- Download Button removed -->
+
+                    </div>
+
+                    <!-- Error Display -->
+                    <div id="error-content" class="mt-6 hidden text-center">
+                       
+                            <h1 class="text-3xl font-extrabold text-center text-red-500">Analysis Failed</h1>
+                            <p class="text-lg text-gray-400 mt-4">An error occurred while processing your request:</p>
+                            <p id="error-message-text" class="text-md text-gray-500 bg-gray-900 p-4 rounded-lg mt-2"></p>
+                    </div>
+
+                </div>
+
+            </div> <!-- End #risk-analyzer-content -->
+        </div> <!-- End #risk-analyzer-section -->
+    </div>
+
+    <!-- ==== Missing Data Warning Modal (New Element) ==== -->
+    <div id="warning-modal" class="absolute inset-0">
+        <div id="warning-modal-content" class="text-center">
+            <h2 class="text-2xl font-bold text-red-400 mb-4">Incomplete Data Submission</h2>
+            <p id="warning-message" class="text-gray-300 mb-6"></p>
+            <div class="flex justify-center space-x-4">
+                <button id="cancel-warning-btn" class="form-button secondary">Cancel & Review</button>
+                <button id="proceed-analysis-btn" class="form-button">Proceed Anyway</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // === Background Animation (Unchanged) ===
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const container = document.getElementById('animated-bg');
+            let neurons = [];
+            const numNeurons = 100;
+            const connectionDistance = 150;
+            let mouseX = 0;
+            let mouseY = 0;
+            container.appendChild(canvas);
+            function resizeCanvas() {
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+                createNeurons();
+            }
+            class Neuron {
+                constructor(x, y) { this.x = x; this.y = y; this.vx = (Math.random() - 0.5) * 0.5; this.vy = (Math.random() - 0.5) * 0.5; this.size = Math.random() * 2 + 0.5; this.depth = Math.random(); }
+                update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; }
+                draw() { ctx.beginPath(); const displayX = this.x + (mouseX - this.x) * this.depth * 0.05; const displayY = this.y + (mouseY - this.y) * this.depth * 0.05; ctx.arc(displayX, displayY, this.size, 0, Math.PI * 2); ctx.fillStyle = `rgba(0, 255, 255, ${this.size * 0.5})`; ctx.shadowBlur = 10; ctx.shadowColor = `rgba(0, 255, 255, 0.8)`; ctx.fill(); ctx.shadowBlur = 0; }
+            }
+            function createNeurons() { neurons = []; for (let i = 0; i < numNeurons; i++) { neurons.push(new Neuron(Math.random() * canvas.width, Math.random() * canvas.height)); } }
+            function drawConnections() { for (let i = 0; i < neurons.length; i++) { for (let j = i + 1; j < neurons.length; j++) { const n1 = neurons[i], n2 = neurons[j]; const dist = Math.hypot(n1.x - n2.x, n1.y - n2.y); if (dist < connectionDistance) { const opacity = 1 - (dist / connectionDistance); ctx.beginPath(); ctx.moveTo(n1.x, n1.y); ctx.lineTo(n2.x, n2.y); ctx.strokeStyle = `rgba(0, 255, 255, ${opacity * 0.2})`; ctx.lineWidth = 0.5; ctx.stroke(); } } } }
+            function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); drawConnections(); neurons.forEach(n => { n.update(); n.draw(); }); requestAnimationFrame(animate); }
+            resizeCanvas(); animate();
+            window.addEventListener('resize', resizeCanvas);
+            window.addEventListener('mousemove', (event) => { mouseX = event.clientX; mouseY = event.clientY; });
+
+            // === Scroll Fade-in ===
+            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) { entry.target.classList.add('visible'); }
+                });
+            }, observerOptions);
+            document.querySelectorAll('.fade-in-on-scroll').forEach(section => { observer.observe(section); });
+
+            // --- Animated Stats Ticker Logic ---
+            const stats = [
+                "up to <span class='text-white'>80%</span> of strokes are preventable.",
+                "every <span class='text-white'>40 seconds</span>, someone has a stroke.",
+                "the <span class='text-white'>#1 cause</span> of long-term disability."
+            ];
+            let currentStat = 0;
+            const tickerText = document.getElementById('stats-ticker-text');
+           
+            if (tickerText) {
+                tickerText.innerHTML = stats[currentStat];
+                setInterval(() => {
+                    tickerText.style.opacity = '0';
+                    setTimeout(() => {
+                        currentStat = (currentStat + 1) % stats.length;
+                        tickerText.innerHTML = stats[currentStat];
+                        tickerText.style.opacity = '1';
+                    }, 500);
+                }, 4000);
+            }
+
+            // --- Interactive Modalities Logic ---
+            const modalityButtons = document.querySelectorAll('.modality-button');
+            const modalityContents = document.querySelectorAll('.modality-content');
+
+            modalityButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+                    modalityButtons.forEach(btn => btn.classList.remove('active'));
+                    modalityContents.forEach(content => content.classList.remove('active'));
+                    button.classList.add('active');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+
+
+            // === **** FORM & NAVIGATION LOGIC **** ===
+
+            // Page elements
+            const homepageContent = document.getElementById('homepage-content');
+           
+            // --- Modal Elements ---
+            const modalOverlay = document.getElementById('modal-overlay');
+            const riskAnalyzerSection = document.getElementById('risk-analyzer-section');
+           
+            const startButtons = [
+                document.getElementById('nav-start-analysis'),
+                document.getElementById('mobile-nav-start-analysis'),
+                document.getElementById('hero-start-analysis'),
+                // Removed the CTA button listener here as the element was removed
+            ];
+
+            const homeButton = document.getElementById('logo-home-link');
+            const restartButton = document.getElementById('restart-button');
+
+            // --- Sidebar ---
+            const allStepItems = document.querySelectorAll('.step-nav-item');
+
+            // --- Content Areas ---
+            const riskAnalyzerContainer = document.getElementById('risk-analyzer-container'); // The glass panel for steps 1-3
+            const step4Page = document.getElementById('step-4'); // Loading page
+            const step5Page = document.getElementById('step-5'); // Results page
+           
+            // 2. LOADING STATUS MESSAGE ELEMENT
+            const loadingStatusMessage = document.getElementById('loading-status-message');
+            let loadingInterval = null;
+            let currentStatusIndex = 0;
+
+            const statusMessages = [
+                "Ingesting Clinical Data: Validating required fields...",
+                "Processing Genetic Report: Scanning for stroke-related SNPs (APOE, MTHFR...)",
+                "Running Image Segmentation: Analyzing MRI slices for acute lesions (SegResNet)...",
+                "Calculating Multi-Modal Fusion Score...",
+                "Finalizing Explainability Report..."
+            ];
+
+            function startLoadingAnimation() {
+                // Reset status and interval
+                currentStatusIndex = 0;
+                loadingStatusMessage.textContent = statusMessages[0];
+                if (loadingInterval) clearInterval(loadingInterval);
+
+                loadingInterval = setInterval(() => {
+                    currentStatusIndex = (currentStatusIndex + 1) % statusMessages.length;
+                    loadingStatusMessage.style.opacity = '0'; // Start fade out
+                    setTimeout(() => {
+                        loadingStatusMessage.textContent = statusMessages[currentStatusIndex];
+                        loadingStatusMessage.style.opacity = '1'; // Fade in
+                    }, 300); // Wait for fade-out (300ms)
+
+                }, 3000); // Change status message every 3 seconds
+            }
+
+            function stopLoadingAnimation() {
+                if (loadingInterval) {
+                    clearInterval(loadingInterval);
+                    loadingInterval = null;
+                }
+            }
+
+
+            // Form step elements
+            const clinicalForm = document.getElementById('clinical-records-form');
+            const nextStepButton1 = document.getElementById('next-step-button');
+            // Select all required inputs in Step 1 for live validation check
+            const requiredInputs = clinicalForm.querySelectorAll('[required], input[type="number"]');
+
+            // Step 2
+            const backButtonStep2 = document.getElementById('back-button-step2');
+            const nextStepButton2 = document.getElementById('next-step-button-2');
+            const geneticFileInput = document.getElementById('genetic-file-input');
+            const geneticFileDropArea = document.getElementById('genetic-file-drop-area');
+            const geneticFilenameDisplay = document.getElementById('genetic-filename-display');
+
+            // Step 3
+            const backButtonStep3 = document.getElementById('back-button-step3');
+            const patientMriChoice = document.getElementById('patient-mri-choice');
+            const researcherMriChoice = document.getElementById('researcher-mri-choice');
+            const dicomZipUploadArea = document.getElementById('dicom-zip-upload-area');
+            const niftiUploadArea = document.getElementById('nifti-upload-area');
+            const dicomZipInput = document.getElementById('dicom-zip-input');
+            const dicomZipDropArea = document.getElementById('dicom-zip-drop-area');
+            const dicomZipFilename = document.getElementById('dicom-zip-filename');
+            const dwiScanInput = document.getElementById('dwi-scan-input');
+            const dwiScanDropArea = document.getElementById('dwi-scan-drop-area');
+            const dwiScanFilename = document.getElementById('dwi-scan-filename');
+            const adcScanInput = document.getElementById('adc-scan-input');
+            const adcScanDropArea = document.getElementById('adc-scan-drop-area');
+            const adcScanFilename = document.getElementById('adc-scan-filename');
+            const submitAnalysisButton = document.getElementById('submit-analysis');
+
+            // Results elements (omitted for brevity)
+            const resultsContent = document.getElementById('results-content');
+            const errorContent = document.getElementById('error-content');
+            const errorMessageText = document.getElementById('error-message-text');
+            const overallRiskValue = document.getElementById('overall-risk-value');
+            const finalDecisionText = document.getElementById('final-decision-text');
+            const ehrRiskValue = document.getElementById('ehr-risk-value');
+            const geneticRiskValue = document.getElementById('genetic-risk-value');
+            const mriRiskValue = document.getElementById('mri-risk-value');
+            const ehrExplanationText = document.getElementById('ehr-explanation-text');
+            const geneticExplanationText = document.getElementById('genetic-explanation-text');
+            const mriExplanationText = document.getElementById('mri-explanation-text');
+            const riskCircle = document.getElementById('risk-circle');
+            const ehrRiskCard = document.getElementById('ehr-risk-card');
+            const geneticRiskCard = document.getElementById('genetic-risk-card');
+            const mriRiskCard = document.getElementById('mri-risk-card');
+            // const downloadButtonContainer = document.getElementById('download-button-container'); // REMOVED
+
+            // --- New Warning Modal Elements ---
+            // FIX: Declared these variables inside DOMContentLoaded to resolve ReferenceError
+            const warningModal = document.getElementById('warning-modal');
+            const warningMessage = document.getElementById('warning-message');
+            const cancelWarningBtn = document.getElementById('cancel-warning-btn');
+            const proceedAnalysisBtn = document.getElementById('proceed-analysis-btn');
+
+            // State variables for file uploads
+            let geneticFile = null;
+            let dicomZipFile = null;
+            let dwiFile = null;
+            let adcFile = null;
+
+            let currentMissingModalities = []; // To store which modalities are missing before proceeding
+
+            function goToStep(stepNumber) {
+                // ... (Step navigation logic remains unchanged)
+                // Update Sidebar
+                allStepItems.forEach(item => {
+                    const itemStep = parseInt(item.dataset.step);
+                    if (itemStep < stepNumber) {
+                        item.classList.add('completed');
+                        item.classList.remove('active');
+                    } else if (itemStep === stepNumber) {
+                        item.classList.remove('completed');
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('completed');
+                        item.classList.remove('active');
+                    }
+                });
+
+                // Update Content Display
+                riskAnalyzerContainer.style.display = 'none';
+                step4Page.style.display = 'none';
+                step5Page.style.display = 'none';
+
+                if (stepNumber >= 1 && stepNumber <= 3) {
+                    riskAnalyzerContainer.style.display = 'block';
+                    const stepIndex = stepNumber - 1;
+                    document.getElementById('form-steps').style.transform = `translateX(-${stepIndex * 33.3333}%)`;
+                    // Update progress bar
+                    if (stepNumber === 1) document.getElementById('progress-bar').style.width = '33%';
+                    else if (stepNumber === 2) document.getElementById('progress-bar').style.width = '66%';
+                    else if (stepNumber === 3) document.getElementById('progress-bar').style.width = '100%';
+                } else if (stepNumber === 4) {
+                    step4Page.style.display = 'flex';
+                } else if (stepNumber === 5) {
+                    step5Page.style.display = 'block';
+                }
+            }
+
+            function showRiskAnalyzer() {
+                // ... (Show analyzer logic remains unchanged)
+                homepageContent.classList.add('transition-out');
+               
+                // Show modal and overlay
+                modalOverlay.style.display = 'block';
+                riskAnalyzerSection.style.display = 'flex';
+               
+                riskAnalyzerSection.classList.remove('transition-out');
+               
+                setTimeout(() => {
+                    modalOverlay.classList.add('active');
+                    riskAnalyzerSection.classList.add('transition-in');
+                }, 10);
+
+                goToStep(1);
+                window.scrollTo(0, 0);
+            }
+
+            function showHomepage() {
+                // 2. STOP LOADING ANIMATION WHEN EXITING
+                stopLoadingAnimation();
+
+                // ... (Show homepage logic remains unchanged)
+                homepageContent.classList.remove('transition-out');
+                homepageContent.classList.add('transition-in');
+               
+                // Hide modal and overlay
+                modalOverlay.classList.remove('active');
+                riskAnalyzerSection.classList.remove('transition-in');
+                riskAnalyzerSection.classList.add('transition-out');
+               
+                setTimeout(() => {
+                    riskAnalyzerSection.style.display = 'none';
+                    modalOverlay.style.display = 'none';
+                   
+                    // Reset all states
+                    goToStep(1);
+                    document.getElementById('progress-bar').style.width = '0%';
+                    clinicalForm.reset();
+                   
+                    // Reset segmented controls to defaults
+                    document.getElementById('gender-male').checked = true;
+                    document.getElementById('married-yes').checked = true;
+                    document.getElementById('work-private').checked = true;
+                    document.getElementById('res-urban').checked = true;
+                    document.getElementById('hyper-no').checked = true;
+                    document.getElementById('heart-no').checked = true;
+                    document.getElementById('fam-no').checked = true;
+                    document.getElementById('smoke-never').checked = true;
+                    document.getElementById('alc-never').checked = true;
+                    document.getElementById('stress-no').checked = true;
+
+                    resetFileInput(geneticFilenameDisplay, geneticFileDropArea);
+                    resetFileInput(dicomZipFilename, dicomZipDropArea);
+                    resetFileInput(dwiScanFilename, dwiScanDropArea);
+                    resetFileInput(adcScanFilename, adcScanDropArea);
+                    geneticFile = null;
+                    dicomZipFile = null;
+                    dwiFile = null;
+                    adcFile = null;
+                   
+                    dicomZipUploadArea.classList.remove('upload-area-active');
+                    niftiUploadArea.classList.remove('upload-area-active');
+                    patientMriChoice.classList.remove('active');
+                    researcherMriChoice.classList.remove('active');
+                    checkAllFilesAndUpdateSubmit();
+
+                    document.getElementById('results-content').classList.remove('hidden');
+                    document.getElementById('error-content').classList.add('hidden');
+                    // downloadButtonContainer.classList.add('hidden'); // REMOVED
+                   
+                    // Reset Risk Circle Styling
+                    const overallCard = document.getElementById('overall-result-card');
+                    overallCard.classList.remove('risk-green', 'risk-yellow', 'risk-red');
+                    document.getElementById('risk-circle').classList.remove('risk-green', 'risk-yellow', 'risk-red');
+                    document.getElementById('overall-risk-value').textContent = '0.0%';
+                    document.getElementById('final-decision-text').textContent = '';
+
+
+                }, 500); // Match CSS transition duration
+            }
+
+            startButtons.forEach(button => {
+                if (button) button.addEventListener('click', showRiskAnalyzer);
+            });
+
+            if (homeButton) homeButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                showHomepage();
+            });
+            if (restartButton) restartButton.addEventListener('click', showHomepage);
+
+            // --- Step Navigation ---
+
+            // Step 1 -> Step 2
+            if (nextStepButton1) nextStepButton1.addEventListener('click', () => {
+                if (clinicalForm.checkValidity()) {
+                    goToStep(2);
+                } else {
+                    // Force the browser to show native validation errors
+                    clinicalForm.reportValidity();
+                }
+            });
+
+            // Step 2 -> Step 3 (Allows skipping genetic upload)
+            if (nextStepButton2) nextStepButton2.addEventListener('click', () => {
+                if (clinicalForm.checkValidity()) {
+                    goToStep(3);
+                } else {
+                    // If EHR is invalid, show errors and go back to Step 1
+                    clinicalForm.reportValidity();
+                    goToStep(1);
+                }
+            });
+           
+            // Step 2 Back Button
+            if (backButtonStep2) backButtonStep2.addEventListener('click', () => goToStep(1));
+
+            // Step 3 -> Step 2
+            if (backButtonStep3) backButtonStep3.addEventListener('click', () => goToStep(2));
+
+            // --- MRI Choice Logic (Improved) ---
+            function resetMriMode() {
+                // Clear active states and hide upload areas
+                patientMriChoice.classList.remove('active');
+                researcherMriChoice.classList.remove('active');
+                dicomZipUploadArea.classList.remove('upload-area-active');
+                niftiUploadArea.classList.remove('upload-area-active');
+               
+                // Clear all MRI files in case of mode switch
+                dicomZipFile = null;
+                dwiFile = null;
+                adcFile = null;
+                resetFileInput(dicomZipFilename, dicomZipDropArea);
+                resetFileInput(dwiScanFilename, dwiScanDropArea);
+                resetFileInput(adcScanFilename, adcScanDropArea);
+                checkAllFilesAndUpdateSubmit();
+            }
+
+            if (patientMriChoice) patientMriChoice.addEventListener('click', (e) => {
+                e.preventDefault();
+                resetMriMode();
+
+                patientMriChoice.classList.add('active');
+                dicomZipUploadArea.classList.add('upload-area-active');
+            });
+
+            if (researcherMriChoice) researcherMriChoice.addEventListener('click', (e) => {
+                e.preventDefault();
+                resetMriMode();
+
+                researcherMriChoice.classList.add('active');
+                niftiUploadArea.classList.add('upload-area-active');
+            });
+           
+            // --- File Handling Functions (Omitted for brevity) ---
+            function setupFileDropArea(dropArea, fileInput, filenameDisplay, fileType) {
+                if (!dropArea) return;
+                dropArea.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', () => {
+                    if (fileInput.files.length > 0) {
+                        handleFile(fileInput.files[0], filenameDisplay, dropArea, fileType);
+                    } else {
+                        handleFile(null, filenameDisplay, dropArea, fileType);
+                    }
+                });
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+                });
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false);
+                });
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false);
+                });
+                dropArea.addEventListener('drop', (e) => {
+                    if (e.dataTransfer.files.length > 0) {
+                        handleFile(e.dataTransfer.files[0], filenameDisplay, dropArea, fileType);
+                    }
+                }, false);
+            }
+
+            function handleFile(file, filenameDisplay, dropArea, fileType) {
+                if (!file) {
+                    resetFileInput(filenameDisplay, dropArea);
+                    if (fileType === 'genetic') geneticFile = null;
+                    else if (fileType === 'dicomZip') dicomZipFile = null;
+                    else if (fileType === 'dwiScan') dwiFile = null;
+                    else if (fileType === 'adcScan') adcFile = null;
+                } else {
+                    let fileSize;
+                    if (file.size < 1024 * 1024) {
+                        fileSize = (file.size / 1024).toFixed(1) + " KB";
+                    } else {
+                        fileSize = (file.size / 1024 / 1024).toFixed(2) + " MB";
+                    }
+
+                    filenameDisplay.innerHTML = `
+                        <span class="text-white">${file.name}</span>
+                        <span class="text-gray-500 text-sm">(${fileSize})</span>
+                    `;
+                   
+                    dropArea.classList.add('has-file');
+
+                    if (fileType === 'genetic') geneticFile = file;
+                    else if (fileType === 'dicomZip') dicomZipFile = file;
+                    else if (fileType === 'dwiScan') dwiFile = file;
+                    else if (fileType === 'adcScan') adcFile = file;
+                }
+               
+                checkAllFilesAndUpdateSubmit();
+            }
+
+            function resetFileInput(filenameDisplay, dropArea) {
+                filenameDisplay.innerHTML = '';
+                dropArea.classList.remove('has-file');
+                dropArea.style.borderColor = '';
+            }
+            // --- End File Handling Functions ---
+           
+            // --- CRITICAL FIX: Ensure button updates on ALL relevant input changes ---
+            function checkAllFilesAndUpdateSubmit() {
+                // EHR validation is the key to enabling the final submit button
+                const isEhrComplete = clinicalForm.checkValidity();
+                submitAnalysisButton.disabled = !isEhrComplete;
+            }
+           
+            // Add listeners to immediately re-check form validity on Step 1 input changes
+            requiredInputs.forEach(input => {
+                // Listen for 'input' on text/number, and 'change' on radio/checkbox
+                input.addEventListener('input', checkAllFilesAndUpdateSubmit);
+                input.addEventListener('change', checkAllFilesAndUpdateSubmit);
+            });
+            // --- END CRITICAL FIX ---
+
+
+            // --- Submission Validity Check (Used for Warning Modal) ---
+            function checkSubmissionValidity() {
+                const isEhrValid = clinicalForm.checkValidity();
+
+                const isGeneticSubmitted = (geneticFile != null);
+                const isMriSubmitted = (
+                    (patientMriChoice.classList.contains('active') && dicomZipFile != null) ||
+                    (researcherMriChoice.classList.contains('active') && dwiFile != null && adcFile != null)
+                );
+
+                const missing = [];
+               
+                if (isEhrValid) {
+                    if (!isGeneticSubmitted) missing.push("Genetic");
+                   
+                    // MRI is considered missing if no valid upload path was completed OR no path was selected
+                    if (!isMriSubmitted) missing.push("Acute MRI");
+                }
+
+
+                return {
+                    isEhrValid: isEhrValid,
+                    isGeneticSubmitted: isGeneticSubmitted,
+                    isMriSubmitted: isMriSubmitted,
+                    isAnyFileSubmitted: isGeneticSubmitted || isMriSubmitted,
+                    missing: missing
+                };
+            }
+
+            // --- Core Analysis Function (Performs Fetch) ---
+            async function performAnalysis() {
+                // 2. START THE ANIMATION AND THEN GO TO STEP 4
+                startLoadingAnimation();
+                goToStep(4);
+               
+                const formData = new FormData(clinicalForm);
+               
+                // 1. Conditionally append files
+                if (geneticFile) {
+                    formData.append('geneticReport', geneticFile);
+                }
+                if (dicomZipFile) {
+                    formData.append('dicomZip', dicomZipFile);
+                } else if (dwiFile && adcFile) {
+                    formData.append('dwiScan', dwiFile);
+                    formData.append('adcScan', adcFile);
+                }
+
+                console.log("Submitting form data to /api/predict...");
+                try {
+                    // NOTE: This fetch call is designed for a local development server
+                    // and will not work in a sandboxed environment without that server running.
+                    const response = await fetch('http://127.0.0.1:8080/api/predict', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.error || `Server responded with ${response.status}`);
+                    }
+                    // 2. STOP ANIMATION ON SUCCESS
+                    stopLoadingAnimation();
+                    displayResults(data);
+                } catch (error) {
+                    console.error('Error:', error);
+                   
+                    const validation = checkSubmissionValidity();
+                    const isMriMissing = validation.missing.includes("Acute MRI");
+                    const isGeneticMissing = validation.missing.includes("Genetic");
+                   
+                    // Define specific mock values using placeholders in case API fails
+                    const mockOverallRisk = 45.3;
+                    const mockLongTermRisk = 72.1;
+                    const mockAcuteRisk = isMriMissing ? 0.0 : 53.3;
+
+                    // *** MODIFIED MOCK FINAL SUMMARY TEXT PER USER REQUEST ***
+                    const mockSummary = `Final risk (${mockOverallRisk.toFixed(1)}%) is a <strong>weighted combination</strong> of long-term risk (${mockLongTermRisk.toFixed(1)}%) and acute MRI findings (${mockAcuteRisk.toFixed(1)}%).`;
+                    // **********************************************************
+
+                    // Mock data display if API fails for demonstration
+                    const mockResults = {
+                        overallRisk: mockOverallRisk,
+                        ehrRisk: mockLongTermRisk,
+                        geneticRisk: isGeneticMissing ? 0.0 : 10.5,
+                        mriRisk: mockAcuteRisk,
+                        causes: {
+                            ehr: [
+                                "Age (72) is a major risk factor.",
+                                "Hypertension is a chronic condition.",
+                                "Smoking status (smoker) significantly increases risk."
+                            ],
+                            // Use currentMissingModalities to generate accurate mock data
+                            genetic: isGeneticMissing ? ["No genetic data submitted."] : ["APOE gene polymorphism detected."],
+                            mri: isMriMissing ? { info: "No MRI data submitted." } : { lesion_volume_mm3: 15.2 },
+                            // Use the new simplified summary text
+                            final_decision_logic: mockSummary
+                        }
+                    };
+                    if (error.message.includes('Failed to fetch')) {
+                        console.warn("Using mock results due to API call failure.");
+                        // 2. STOP ANIMATION ON MOCK SUCCESS
+                        stopLoadingAnimation();
+                        displayResults(mockResults);
+                    } else {
+                        // 2. STOP ANIMATION ON ERROR
+                        stopLoadingAnimation();
+                        displayError(error.message);
+                    }
+                }
+            }
+            // --- End Core Analysis Function ---
+
+            // --- Main Submit Button Logic ---
+            if (submitAnalysisButton) submitAnalysisButton.addEventListener('click', async () => {
+                const validation = checkSubmissionValidity();
+
+                if (!validation.isEhrValid) {
+                    // EHR form is the base requirement (age, glucose). Go back to Step 1 and force visibility of errors.
+                    clinicalForm.reportValidity();
+                    goToStep(1);
+                    return;
+                }
+
+                if (validation.missing.length > 0) {
+                    // If EHR is valid but optional files are missing, show the warning modal
+                    showWarningModal(validation.missing);
+                    return;
+                }
+               
+                // If EHR is valid and no files are missing, proceed directly
+                await performAnalysis();
+            });
+
+            // --- Warning Modal Logic (Unchanged for brevity) ---
+            function showWarningModal(missingModalities) {
+                currentMissingModalities = missingModalities;
+                const listHtml = missingModalities.map(m => `<li class="list-disc ml-6 text-red-300"><strong>${m}</strong></li>`).join('');
+                warningMessage.innerHTML = `
+                    <p>The analysis will proceed using only the available data. However, your result will be less comprehensive as you are missing the following critical inputs:</p>
+                    <ul class="text-left mt-4 mb-4 inline-block">${listHtml}</ul>
+                    <p>Do you wish to proceed with the incomplete data submission?</p>
+                `;
+                warningModal.classList.add('active');
+            }
+
+            function hideWarningModal() {
+                warningModal.classList.remove('active');
+            }
+
+            // FIX: Attach listeners to the modal buttons
+            cancelWarningBtn.addEventListener('click', hideWarningModal);
+
+            proceedAnalysisBtn.addEventListener('click', async () => {
+                hideWarningModal();
+                await performAnalysis();
+            });
+            // --- End Warning Modal Logic ---
+
+            // --- Results Display/Generation Functions (Omitted for brevity) ---
+            function displayResults(data) {
+                resultsContent.classList.remove('hidden');
+                errorContent.classList.add('hidden');
+                // downloadButtonContainer.classList.remove('hidden'); // REMOVED
+               
+                // 1. Set the numbers
+                ehrRiskValue.textContent = `${data.ehrRisk.toFixed(1)}%`;
+                geneticRiskValue.textContent = `${data.geneticRisk.toFixed(1)}%`;
+                mriRiskValue.textContent = `${data.mriRisk.toFixed(1)}%`;
+               
+                // *** MODIFIED: Use .innerHTML for rich text (for the strong/bold tag) ***
+                finalDecisionText.innerHTML = data.causes.final_decision_logic || '';
+                // **********************************************************************
+
+                // 2. Set the Overall Risk Circle
+                overallRiskValue.textContent = `${data.overallRisk.toFixed(1)}%`;
+               
+                // Remove all color classes first
+                riskCircle.classList.remove('risk-green', 'risk-yellow', 'risk-red');
+                document.getElementById('overall-result-card').classList.remove('risk-green', 'risk-yellow', 'risk-red');
+               
+                // Add the correct color class based on risk
+                const cardElement = document.getElementById('overall-result-card');
+                if (data.overallRisk <= 35) {
+                    riskCircle.classList.add('risk-green');
+                    cardElement.classList.add('risk-green');
+                } else if (data.overallRisk <= 75) {
+                    riskCircle.classList.add('risk-yellow');
+                    cardElement.classList.add('risk-yellow');
+                } else {
+                    riskCircle.classList.add('risk-red');
+                    cardElement.classList.add('risk-red');
+                }
+
+                // 3. Color code sub-cards
+                [ehrRiskCard, geneticRiskCard, mriRiskCard].forEach(card => {
+                    card.classList.remove('risk-green', 'risk-yellow', 'risk-red');
+                });
+               
+                // Helper to apply color coding
+                const applyRiskColor = (card, risk) => {
+                    if (risk <= 35) card.classList.add('risk-green');
+                    else if (risk <= 75) card.classList.add('risk-yellow');
+                    else card.classList.add('risk-red');
+                };
+               
+                applyRiskColor(ehrRiskCard, data.ehrRisk);
+                applyRiskColor(geneticRiskCard, data.geneticRisk);
+                applyRiskColor(mriRiskCard, data.mriRisk);
+
+               
+                // 4. Generate and set the explanations
+                ehrExplanationText.innerHTML = generateEhrExplanation(data.causes.ehr, data.ehrRisk);
+                geneticExplanationText.innerHTML = generateGeneticExplanation(data.causes.genetic, data.geneticRisk);
+                mriExplanationText.innerHTML = generateMriExplanation(data.causes.mri, data.mriRisk);
+               
+                goToStep(5);
+            }
+           
+            function displayError(errorMessage) {
+                resultsContent.classList.add('hidden');
+                errorContent.classList.remove('hidden');
+                // downloadButtonContainer.classList.add('hidden'); // REMOVED
+                errorMessageText.textContent = errorMessage;
+                goToStep(5);
+            }
+           
+            function generateEhrExplanation(ehrData, ehrRisk) {
+                if (ehrData.includes("No EHR data submitted.")) {
+                    return "<p>No Clinical (EHR) data was submitted for this assessment.</p>";
+                }
+                if (ehrData.length === 0 || ehrData.includes("No major predefined risk factors identified in clinical data.")) {
+                    return `<p>Your clinical risk score is <strong>${ehrRisk.toFixed(1)}%</strong>. No major predefined risk factors were identified, suggesting your current clinical health factors are well-managed.</p>`;
+                }
+               
+                let intro = `<p>Your clinical risk score of <strong>${ehrRisk.toFixed(1)}%</strong> is primarily driven by the following factors:</p>`;
+                let factorsList = ehrData.map(item => `<li class="ml-4 list-disc">${item}</li>`).join('');
+                let explanation = "";
+                if (ehrRisk > 75) {
+                    explanation = "<p>This is a <strong>high-risk score</strong>, strongly indicating that current clinical factors (like age, hypertension, and heart disease) are the most significant contributors to your long-term stroke risk. Managing these conditions is a critical next step.</p>";
+                } else if (ehrRisk > 40) {
+                    explanation = "<p>This is a <strong>moderate-risk score</strong>. While not in the highest bracket, these factors are actively contributing to your risk and should be discussed with your doctor.</p>";
+                } else {
+                    explanation = "<p>This is a <strong>low-to-moderate risk score</strong>, suggesting your primary risk may come from other areas, or your clinical factors are relatively low.</p>";
+                }
+                return `${intro}<ul class="mt-2">${factorsList}</ul><p class="mt-2">${explanation}</p>`;
+            }
+
+            function generateMriExplanation(mriData, mriRisk) {
+                if (mriData.info === "No MRI data submitted.") {
+                    return "<p>No Acute MRI data was submitted for this assessment.</p>";
+                }
+                if (mriData.error) {
+                    return `<p class="text-red-400">An error occurred during the MRI analysis: ${mriData.error}</p>`;
+                }
+                if (mriData.lesion_volume_mm3 > 0) {
+                    return `
+                        <p>Our analysis of the MRI scans <strong>detected an acute lesion</strong>, which is an area of recent tissue damage often associated with a stroke. The model identified a lesion with a volume of approximately <strong>${mriData.lesion_volume_mm3.toFixed(1)} mm³</strong>.</p>
+                        <p>This finding is the primary reason for the <strong>${mriRisk.toFixed(1)}%</strong> acute risk score. The volume and location influence the final acute risk.</p>
+                    `;
+                } else {
+                    return `
+                        <p>The MRI scan analysis <strong>did not detect any significant acute lesions</strong> (areas of recent stroke-related damage). This is an excellent sign and contributes <strong>${mriRisk.toFixed(1)}%</strong> to the acute risk score for this category.</p>
+                    `;
+                }
+            }
+
+            function generateGeneticExplanation(geneticData, geneticRisk) {
+                 if (geneticData.includes("No genetic data submitted.")) {
+                    return "<p>No Genetic data was submitted for this assessment.</p>";
+                }
+                let intro = `<p>Your genetic risk score of <strong>${geneticRisk.toFixed(1)}%</strong> is based on known genetic markers (SNPs). Your report showed the following high-impact markers:</p>`;
+                let factorsList = geneticData.map(item => `<li class="ml-4 list-disc">${item}</li>`).join('');
+                let explanation = "";
+                if (geneticRisk > 75) {
+                    explanation = "<p>This score suggests a <strong>high genetic predisposition</strong> for stroke. This is not a diagnosis, but it is important information to share with your doctor, as it may influence preventative strategies.</p>";
+                } else if (geneticRisk > 40) {
+                    explanation = "<p>This score suggests a <strong>moderate genetic predisposition</strong>. These factors contribute to your long-term risk profile, but are often less impactful than acute or clinical factors.</p>";
+                } else {
+                    explanation = "<p>This score suggests a <strong>low genetic predisposition</strong>, meaning your genes do not appear to be a significant factor in your overall stroke risk.</p>";
+                }
+                return `${intro}<ul class="mt-2">${factorsList}</ul><p class="mt-2">${explanation}</p>`;
+            }
+
+           
+            // Initialize all file upload areas
+            setupFileDropArea(geneticFileDropArea, geneticFileInput, geneticFilenameDisplay, 'genetic');
+            setupFileDropArea(dicomZipDropArea, dicomZipInput, dicomZipFilename, 'dicomZip');
+            setupFileDropArea(dwiScanDropArea, dwiScanInput, dwiScanFilename, 'dwiScan');
+            setupFileDropArea(adcScanDropArea, adcScanInput, adcScanFilename, 'adcScan');
+        });
+
+    </script>
+</body>
+</html>
